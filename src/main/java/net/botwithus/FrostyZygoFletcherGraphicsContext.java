@@ -54,23 +54,18 @@ public class FrostyZygoFletcherGraphicsContext extends ScriptGraphicsContext {
                     ImGui.Text("Instructions - Start near desired activity, with add pathing for each down the line");
                     ImGui.Text("My script's state is: " + script.getBotState());
 
-                    // Start and Stop button
                     ImGui.SameLine();
                     if (ImGui.Button(script.getBotState() == FrostyZygoFletcher.BotState.IDLE ? "Start" : "Stop")) {
                         if (script.getBotState() == FrostyZygoFletcher.BotState.IDLE) {
-                            // Change to SKILLING state (Start bot)
                             script.setBotState(FrostyZygoFletcher.BotState.SKILLING);
                         } else {
-                            // Stop the bot
-                            script.stopBot();  // Call stopBot() to stop the bot immediately
+                            script.stopBot();
                         }
                     }
 
-                    // Selection dropdown for processing type
                     ImGui.Text("Select Processing Type:");
-                    String[] options = { "Fungal Shafts", "Sharp Shells", "Dino Propellant" };
+                    String[] options = { "Fungal Shafts", "Sharp Shells", "Dino Propellant", "Headless Arrows", "Tip Arrows" };
 
-                    // Determine the currently selected option
                     int selectedIndex = -1;
                     if (script.isFungalShaftsSelected()) {
                         selectedIndex = 0;
@@ -78,6 +73,10 @@ public class FrostyZygoFletcherGraphicsContext extends ScriptGraphicsContext {
                         selectedIndex = 1;
                     } else if (script.isDinoPropellantSelected()) {
                         selectedIndex = 2;
+                    } else if (script.isHeadlessArrowsSelected()) {
+                        selectedIndex = 3;
+                    } else if (script.isTipArrowsSelected()) {
+                        selectedIndex = 4;
                     }
 
                     if (ImGui.Button("Select Processing Type")) {
@@ -89,10 +88,11 @@ public class FrostyZygoFletcherGraphicsContext extends ScriptGraphicsContext {
                             boolean isSelected = (selectedIndex == i);
 
                             if (ImGui.Selectable(options[i], isSelected, 0)) {
-                                // Update script state based on selection
                                 script.setFungalShaftsSelected(i == 0);
                                 script.setSharpShellsSelected(i == 1);
                                 script.setDinoPropellantSelected(i == 2);
+                                script.setHeadlessArrowsSelected(i == 3);
+                                script.setTipArrowsSelected(i == 4);
                             }
 
                             if (isSelected) {
@@ -102,10 +102,11 @@ public class FrostyZygoFletcherGraphicsContext extends ScriptGraphicsContext {
                         ImGui.EndPopup();
                     }
 
-                    // Display selected option
                     String selectedText = script.isFungalShaftsSelected() ? "Fungal Shafts"
                             : script.isSharpShellsSelected() ? "Sharp Shells"
                             : script.isDinoPropellantSelected() ? "Dino Propellant"
+                            : script.isHeadlessArrowsSelected() ? "Headless Arrows"
+                            : script.isTipArrowsSelected() ? "Tip Arrows"
                             : "None";
                     ImGui.Text("Selected: " + selectedText);
 

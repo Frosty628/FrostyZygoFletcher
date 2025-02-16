@@ -4,8 +4,10 @@ import net.botwithus.api.game.hud.inventories.Backpack;
 import net.botwithus.internal.scripts.ScriptDefinition;
 import net.botwithus.rs3.game.Client;
 import net.botwithus.rs3.game.Item;
+import net.botwithus.rs3.game.hud.interfaces.Component;
 import net.botwithus.rs3.game.hud.interfaces.Interfaces;
 import net.botwithus.rs3.game.queries.builders.characters.NpcQuery;
+import net.botwithus.rs3.game.queries.builders.components.ComponentQuery;
 import net.botwithus.rs3.game.queries.builders.objects.SceneObjectQuery;
 import net.botwithus.rs3.game.scene.entities.characters.npc.Npc;
 import net.botwithus.rs3.game.scene.entities.characters.player.LocalPlayer;
@@ -24,6 +26,8 @@ public class FrostyZygoFletcher extends LoopingScript {
     private boolean fungalShaftsSelected = false;
     private boolean sharpShellsSelected = false;
     private boolean dinoPropellantSelected = false;
+    private boolean headlessArrowsSelected = false;
+    private boolean tipArrowsSelected = false;
     private volatile boolean stopped = false;
 
     private long lastInteractionTime = 0;
@@ -50,6 +54,22 @@ public class FrostyZygoFletcher extends LoopingScript {
 
     public void setDinoPropellantSelected(boolean dinoPropellantSelected) {
         this.dinoPropellantSelected = dinoPropellantSelected;
+    }
+
+    public boolean isHeadlessArrowsSelected() {
+        return headlessArrowsSelected;
+    }
+
+    public boolean isTipArrowsSelected() {
+        return tipArrowsSelected;
+    }
+
+    public void setHeadlessArrowsSelected(boolean headlessArrowsSelected) {
+        this.headlessArrowsSelected = headlessArrowsSelected;
+    }
+
+    public void setTipArrowsSelected(boolean tipArrowsSelected) {
+        this.tipArrowsSelected = tipArrowsSelected;
     }
 
     enum BotState {
@@ -96,36 +116,33 @@ public class FrostyZygoFletcher extends LoopingScript {
     }
 
     private long handleSkilling(LocalPlayer player) {
-        // Ensure no actions are performed if the bot is stopped
         if (stopped) {
-            botState = BotState.IDLE; // Reset bot state to IDLE if stopped
-            return 0; // Early return to stop further actions
+            botState = BotState.IDLE;
+            return 0;
         }
 
         long currentTime = System.currentTimeMillis();
         long randomInterval = random.nextLong(7000, 10000);
 
-        // Ensure enough time has passed since the last interaction
         if (currentTime - lastInteractionTime < randomInterval) {
             return random.nextLong(1500, 3000);
         }
 
-        // Check which option is selected
-        if (fungalShaftsSelected && !sharpShellsSelected && !dinoPropellantSelected) {
-            // === FUNGAL SHAFTS LOGIC ===
+        if (fungalShaftsSelected && !sharpShellsSelected && !dinoPropellantSelected && !headlessArrowsSelected && !tipArrowsSelected) {
             println("Fungal Shafts");
-            if (botState == BotState.SKILLING) {
-                // Call the method to interact with Scruffy zygomite
-                interactWithScruffyZygomite(player);
-            }
-        } else if (sharpShellsSelected && !fungalShaftsSelected && !dinoPropellantSelected) {
-            // === SHARP SHELLS LOGIC ===
+            interactWithScruffyZygomite(player);
+        } else if (sharpShellsSelected && !fungalShaftsSelected && !dinoPropellantSelected && !headlessArrowsSelected && !tipArrowsSelected) {
             println("Sharp Shells selected");
             interactWithDinosaurEggPile(player);
-        } else if (dinoPropellantSelected && !fungalShaftsSelected && !sharpShellsSelected) {
-            // === DINO PROPELLANT LOGIC ===
+        } else if (dinoPropellantSelected && !fungalShaftsSelected && !sharpShellsSelected && !headlessArrowsSelected && !tipArrowsSelected) {
             println("Dino Propellant selected");
             interactWithStormBarn(player);
+        } else if (headlessArrowsSelected && !fungalShaftsSelected && !sharpShellsSelected && !dinoPropellantSelected && !tipArrowsSelected) {
+            println("Headless Arrows selected");
+            interactWithHeadlessArrows(player);
+        } else if (tipArrowsSelected && !fungalShaftsSelected && !sharpShellsSelected && !dinoPropellantSelected && !headlessArrowsSelected) {
+            println("Tip Arrows selected");
+            interactWithTipArrows(player);
         }
 
         return random.nextLong(1500, 3000);
@@ -398,6 +415,7 @@ public class FrostyZygoFletcher extends LoopingScript {
     }
 
     private long ignitePotteringtonBlend(LocalPlayer player) {
+
         println("Attempting to Ignite Potterington Blend");
 
         Item potteringtonBlendItem = Backpack.getItem("Potterington Blend #102 Fertiliser");
@@ -425,6 +443,104 @@ public class FrostyZygoFletcher extends LoopingScript {
         }
         return random.nextLong(1500, 3000); // Return delay if no item found
     }
+
+    private long interactWithHeadlessArrows(LocalPlayer player) {
+        println("Attempting to Fletch Tempered Fungal Shaft");
+
+        Item temperedFungalShaftItem = Backpack.getItem("Tempered fungal shaft");
+
+        if (temperedFungalShaftItem != null) {
+            // Interact with the item in the backpack
+            int itemSlot = Backpack.getItems().indexOf(temperedFungalShaftItem);
+            if (itemSlot != -1) {
+                println("Interacting with Tempered Fungal Shaft: " + Backpack.interact(itemSlot, "'Flight'"));
+                lastInteractionTime = System.currentTimeMillis();
+
+                Execution.delay(random.nextLong(1500, 3000));
+
+                // Query the component for the specific Fletch option
+                Component comp = ComponentQuery.newQuery(1370)
+                        .componentIndex(30)
+                        .hidden(false)
+                        .type(0)
+                        .results()
+                        .first();
+
+                if (comp != null) {
+                    println("Component found: Interacting with Fletch button.");
+                    if (comp.interact(0)) {  // Matches DoAction(DIALOGUE, 0, -1, 89784350)
+                        println("Successfully interacted with 'Fletch'.");
+                    } else {
+                        println("Failed to interact with 'Fletch'.");
+                    }
+                    Execution.delay(random.nextLong(1000, 2000));
+                } else {
+                    println("Component not found or unavailable.");
+                }
+
+                // Wait for Animation ID -1 for at least 5 seconds
+                waitForAnimationStable(player, -1, 5000); // Ensure animation -1 occurs for at least 5s
+
+                return random.nextLong(1500, 3000); // Return delay after performing the action
+            }
+        } else {
+            println("No Tempered Fungal Shaft found in backpack.");
+        }
+        return random.nextLong(1500, 3000); // Return delay if no item found
+    }
+
+    private void interactWithTipArrows(LocalPlayer player) {
+        if (stopped) {
+            println("Bot stopped");
+            return;
+        }
+
+        println("Attempting to Tip Headless Dinarrows");
+
+        Item headlessDinarrow = Backpack.getItem("Headless dinarrow");
+
+        if (headlessDinarrow != null) {
+            // Interact with the item in the backpack
+            int itemSlot = Backpack.getItems().indexOf(headlessDinarrow);
+            if (itemSlot != -1) {
+                println("Interacting with Headless Dinarrow: " + Backpack.interact(itemSlot, "Tip"));
+                lastInteractionTime = System.currentTimeMillis();
+
+                Execution.delay(random.nextLong(1500, 3000));
+
+                // Query the component for the specific "Fletch" option
+                Component comp = ComponentQuery.newQuery(1370) // Extracted interface ID
+                        .componentIndex(30)  // Extracted component index
+                        .hidden(false)       // Ensure the component is not hidden
+                        .type(0)             // Type for clickable components (buttons, etc.)
+                        .results()
+                        .first();
+
+                if (comp != null) {
+                    // Use result.interact(0) to interact with the "Fletch" option (as indicated by the DoAction parameter)
+                    boolean success = comp.interact(0); // Action parameter matches DoAction(DIALOGUE, 0, -1, 89784350)
+                    if (success) {
+                        println("Successfully interacted with 'Fletch'.");
+                    } else {
+                        println("Failed to interact with 'Fletch'.");
+                    }
+                } else {
+                    println("Component not found or unavailable.");
+                }
+
+                // Wait for Animation ID -1 for at least 5 seconds
+                waitForAnimationStable(player, -1, 2000); // Ensure animation -1 occurs for at least 5s
+
+                println("Finished crafting tipped arrows.");
+                return;
+            }
+        } else {
+            println("No Headless Dinarrow found in backpack.");
+        }
+
+        Execution.delay(random.nextLong(1500, 3000)); // Return delay if no item found
+    }
+
 
 
 
