@@ -5,7 +5,6 @@ import net.botwithus.internal.scripts.ScriptDefinition;
 import net.botwithus.rs3.game.Client;
 import net.botwithus.rs3.game.Item;
 import net.botwithus.rs3.game.hud.interfaces.Component;
-import net.botwithus.rs3.game.hud.interfaces.Interfaces;
 import net.botwithus.rs3.game.queries.builders.characters.NpcQuery;
 import net.botwithus.rs3.game.queries.builders.components.ComponentQuery;
 import net.botwithus.rs3.game.queries.builders.objects.SceneObjectQuery;
@@ -497,13 +496,13 @@ public class FrostyZygoFletcher extends LoopingScript {
 
         println("Attempting to Tip Headless Dinarrows");
 
-        Item headlessDinarrow = Backpack.getItem("Headless dinarrow");
+        Item sharpShellShards = Backpack.getItem("Sharp shell shard");
 
-        if (headlessDinarrow != null) {
+        if (sharpShellShards != null) {
             // Interact with the item in the backpack
-            int itemSlot = Backpack.getItems().indexOf(headlessDinarrow);
+            int itemSlot = Backpack.getItems().indexOf(sharpShellShards);
             if (itemSlot != -1) {
-                println("Interacting with Headless Dinarrow: " + Backpack.interact(itemSlot, "Tip"));
+                println("Interacting with Sharp shell shard: " + Backpack.interact(itemSlot, "Tip"));
                 lastInteractionTime = System.currentTimeMillis();
 
                 Execution.delay(random.nextLong(1500, 3000));
@@ -520,7 +519,7 @@ public class FrostyZygoFletcher extends LoopingScript {
                     // Use result.interact(0) to interact with the "Fletch" option (as indicated by the DoAction parameter)
                     boolean success = comp.interact(0); // Action parameter matches DoAction(DIALOGUE, 0, -1, 89784350)
                     if (success) {
-                        println("Successfully interacted with 'Fletch'.");
+                        println("Successfully interacted with 'ADD TIPS'.");
                     } else {
                         println("Failed to interact with 'Fletch'.");
                     }
