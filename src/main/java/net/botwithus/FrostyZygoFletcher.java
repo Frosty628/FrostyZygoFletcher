@@ -528,7 +528,7 @@ public class FrostyZygoFletcher extends LoopingScript {
                 }
 
                 // Wait for Animation ID -1 for at least 5 seconds
-                waitForAnimationStable(player, -1, 2000); // Ensure animation -1 occurs for at least 5s
+                waitForAnimationStable(player, -1, 4000); // Ensure animation -1 occurs for at least 5s
 
                 println("Finished crafting tipped arrows.");
                 return;
